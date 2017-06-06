@@ -59,15 +59,17 @@ button_t buttons[BUTTONS] = {
 
 // air strings, laser diode pointing at photoresistor
 // interupt the laser and it triggers a string pluck
+enum string_state_t {
+	IDLE = 0,
+	EVENT = 1,
+	RECOVER = 2
+};
+
 typedef struct string {
 	uint8_t pin;
 	unsigned int value;
 	unsigned int baseline_value;
-	enum string_state {
-		IDLE = 0,
-		EVENT = 1,
-		RECOVER = 2
-	} state;
+	string_state_t state;
 } string_t;
 
 #define STRINGS 8
@@ -228,17 +230,15 @@ void loop() {
 
 	// this needs to do something with the new value	
 	for (i = 0; i < STRINGS; ++i) {
-		event_magnitude = 0;
 		value = analogRead(strings[i].pin);
 		// if we have deviated more than STRING_LEVEL_EVENT_PERCENT_CHANGE% of baseline
 		// report a change
 		if (strings[i].state == IDLE && value < strings[i].baseline_value - (strings[i].baseline_value / STRING_LEVEL_EVENT_PERCENT_CHANGE)) {
 			strings[i].state = EVENT;
-			strings[i].value = value;
 #ifdef DEBUG
 			Serial1.print("string ");
 			Serial1.print(i, DEC);
-			Serial1.print("event begins");
+			Serial1.println("event begins");
 #endif
 		} else if (strings[i].state == EVENT) {
 			// if value begins to recover, put us in recover state
@@ -261,5 +261,6 @@ void loop() {
 			Serial1.println("is idle again");
 #endif
 		}
+		strings[i].value = value;
 	}
 }
