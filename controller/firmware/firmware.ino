@@ -1,5 +1,8 @@
 #include <Adafruit_MCP23017.h>
 
+#undef DEBUG
+#define DEBUG
+
 Adafruit_MCP23017 mcp0, mcp1;
 
 typedef struct encoder {
@@ -72,6 +75,11 @@ string_t strings[STRINGS] = {
 void setup() {
 	int i;
 
+#ifdef DEBUG
+	Serial1.begin(115200);
+	Serial1.print("setup...");
+#endif
+
 	// intialize the i2c devices
 	mcp0.begin(0);
 	mcp1.begin(1);
@@ -82,6 +90,9 @@ void setup() {
 		encoders[i].mcpX->pinMode(encoders[i].pinA, INPUT);
 		encoders[i].mcpX->pinMode(encoders[i].pinB, INPUT);
 		encoders[i].mcpX->pinMode(encoders[i].pinSW, INPUT);
+		encoders[i].A = encoders[i].mcpX->digitalRead(encoders[i].pinA);
+		encoders[i].B = encoders[i].mcpX->digitalRead(encoders[i].pinB);
+		encoders[i].sw = encoders[i].mcpX->digitalRead(encoders[i].pinSW);
 	}
 
 	// setup input pins and enable pullups
@@ -89,8 +100,10 @@ void setup() {
 		if (buttons[i].mcpX) {
 			buttons[i].mcpX->pinMode(buttons[i].pin, INPUT);
 			buttons[i].mcpX->pullUp(buttons[i].pin, HIGH);
+			buttons[i].sw = buttons[i].mcpX->digitalRead(buttons[i].pin);
 		} else {
 			pinMode(buttons[i].pin, INPUT_PULLUP);
+			buttons[i].sw = digitalRead(buttons[i].pin);
 		}
 	}
 
@@ -98,6 +111,18 @@ void setup() {
 	for (i = 0; i < STRINGS; ++i) {
 		strings[i].value = analogRead(strings[i].pin);
 	}
+
+#ifdef DEBUG
+	Serial1.println("done");
+
+	Serial1.println("analog values for air strings:");
+	for (i = 0; i < STRINGS; ++i) {
+		Serial1.print("string ");
+		Serial1.print(i, DEC);
+		Serial1.print(": ");
+		Serial1.println(strings[i].value, DEC);
+	}
+#endif
 }
 
 uint16_t gpioAB[2];
