@@ -20,7 +20,6 @@ module display() {
     // board
     %translate([-displayBoardWidth / 2, -displayBoardHeight / 2, -displayBoardThickness])
         cube([displayBoardWidth, displayBoardHeight, displayBoardThickness], center=false);
-    // screen mounts
     // corner tabs
     for (i = [-1,1])
         for (j = [-1,1]) {
@@ -35,12 +34,16 @@ module display() {
 
 // encoders
 encoderShaftDiameter = 7;
+encoderShaftHeight = 18;
 encoderWidth = 18;
 encoderLength = 31;
 encoderDepth = 8.2;
 module encoder() {
     // encoder shaft
+    cylinder(h = encoderShaftHeight, d = encoderShaftDiameter, center=false);
     // encoder base
+    translate([-encoderWidth/2, -encoderLength/2, -encoderDepth/2])
+        cube([encoderWidth, encoderLength, encoderDepth]);
 }
 
 // lid with screen and encoders
@@ -60,4 +63,5 @@ module box() {
     // hifi audio out
 }
 
-display();
+//display();
+encoder();
