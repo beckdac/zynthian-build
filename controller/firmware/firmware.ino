@@ -4,6 +4,12 @@
 // Wire.setClock after Wire.begin to increase the i2c clock to 1.7M
 // which is an allowed rate in the MCP23017 datasheet
 
+#undef MIDI
+#define MIDI
+#ifdef MIDI
+const int channel = 1;
+#endif
+
 #undef DEBUG
 #define DEBUG
 
@@ -16,19 +22,20 @@ typedef struct encoder {
 	int16_t value;				// value of encoder
 	int16_t min_value;			// min value encoder can have
 	int16_t max_value;			// max value encoder can have
+	uint8_t control_number;		// control number
 } encoder_t;
 
 #define ENCODERS 8
 // setup the encoder data structures
 encoder_t encoders[ENCODERS] = {
-	{ &mcp0, 0, 1, 2,    true, true, false, 0, 0, 20 },
-	{ &mcp0, 3, 4, 5,    true, true, false, 0, 0, 20 },
-	{ &mcp0, 8, 9, 10,   true, true, false, 0, 0, 20 },
-	{ &mcp0, 11, 12, 13, true, true, false, 0, 0, 20 },
-	{ &mcp1, 0, 1, 2,    true, true, false, 0, 0, 20 },
-	{ &mcp1, 3, 4, 5,    true, true, false, 0, 0, 20 },
-	{ &mcp1, 8, 9, 10,   true, true, false, 0, 0, 20 },
-	{ &mcp1, 11, 12, 13, true, true, false, 0, 0, 20 }
+	{ &mcp0, 0, 1, 2,    true, true, false, 63, 0, 127, 70 },
+	{ &mcp0, 3, 4, 5,    true, true, false, 63, 0, 127, 71 },
+	{ &mcp0, 8, 9, 10,   true, true, false, 63, 0, 127, 72 },
+	{ &mcp0, 11, 12, 13, true, true, false, 63, 0, 127, 73 },
+	{ &mcp1, 0, 1, 2,    true, true, false, 63, 0, 127, 74 },
+	{ &mcp1, 3, 4, 5,    true, true, false, 63, 0, 127, 75 },
+	{ &mcp1, 8, 9, 10,   true, true, false, 63, 0, 127, 76 },
+	{ &mcp1, 11, 12, 13, true, true, false, 63, 0, 127, 77 }
 };
 
 typedef struct button {
@@ -39,7 +46,7 @@ typedef struct button {
 
 #define BUTTONS 16
 button_t buttons[BUTTONS] = {
-	{ &mcp0, 6,  false },
+	{ &mcp0, 6,  false },	// latch
 	{ &mcp0, 7,  false },
 	{ &mcp0, 14, false },
 	{ &mcp0, 15, false },
@@ -47,7 +54,7 @@ button_t buttons[BUTTONS] = {
 	{ &mcp1, 7,  false },
 	{ &mcp1, 14, false },
 	{ &mcp1, 15, false },
-	{ NULL, 2,  false },
+	{ NULL, 2,  false },	// momentary
 	{ NULL, 3,  false },
 	{ NULL, 4,  false },
 	{ NULL, 5,  false },
@@ -67,6 +74,7 @@ enum string_state_t {
 
 typedef struct string {
 	uint8_t pin;
+	unsigned int note;
 	unsigned int value;
 	unsigned int baseline_value;
 	string_state_t state;
@@ -74,14 +82,14 @@ typedef struct string {
 
 #define STRINGS 8
 string_t strings[STRINGS] = {
-	{ 0,  0, 0, IDLE },
-	{ 1,  0, 0, IDLE },
-	{ 2,  0, 0, IDLE },
-	{ 3,  0, 0, IDLE },
-	{ 6,  0, 0, IDLE },
-	{ 7,  0, 0, IDLE },
-	{ 8,  0, 0, IDLE },
-	{ 9,  0, 0, IDLE }
+	{ 2, 60, 0, IDLE },	// C4
+	{ 3, 62, 0, IDLE },	// D4
+	{ 4, 64, 0, IDLE },	// E4
+	{ 5, 65, 0, IDLE },	// F4
+	{ 6, 67, 0, IDLE },	// G4
+	{ 7, 69, 0, IDLE },	// A4
+	{ 8, 71, 0, IDLE }, // B4
+	{ 9, 72, 0, IDLE },	// C5
 };
 
 #define STRING_LEVEL_EVENT_PERCENT_CHANGE 30
@@ -187,6 +195,9 @@ void loop() {
 				Serial1.print("value change (+1): ");
 				Serial1.println(encoders[i].value, DEC);
 #endif
+#ifdef MIDI
+				usbMIDI.sendControlChange(encoders[i].control, encoders[i].value, channel);
+#endif
 			}
 		}
 		// decrease?
@@ -201,6 +212,9 @@ void loop() {
 				Serial1.print(i, DEC);
 				Serial1.print("value change (-1): ");
 				Serial1.println(encoders[i].value, DEC);
+#endif
+#ifdef MIDI
+				usbMIDI.sendControlChange(encoders[i].control, encoders[i].value, channel);
 #endif
 			}
 		}
@@ -251,6 +265,10 @@ void loop() {
 				Serial1.print("event with magnitude: ");
 				Serial1.println(event_magnitude, DEC);
 #endif
+#ifdef MIDI
+				// divide by 8 as max value of event could be 1024 and max value of velocity is 127
+				usbMIDI.sendNoteOn(strings[i].note, event_magnitude / 8, channel);
+#endif
 			}
 		// if we are in recovery state and the analog voltage has reached baseline again IDLE the event
 		} else if (strings[i].state == RECOVER && value >  strings[i].baseline_value - (strings[i].baseline_value / STRING_LEVEL_EVENT_PERCENT_CHANGE)) {
@@ -260,7 +278,18 @@ void loop() {
 			Serial1.print(i, DEC);
 			Serial1.println("is idle again");
 #endif
+#ifdef MIDI
+			usbMIDI.sendNoteOff(strings[i].note, 0, channel);
+#endif
 		}
 		strings[i].value = value;
 	}
+
+#ifdef MIDI
+	// discard incoming messages
+	while (usbMIDI.read());
+
+	// send any pending messages
+	usbMIDI.send_now();
+#endif
 }
