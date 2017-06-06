@@ -20,13 +20,32 @@ module display() {
     // board
     %translate([-displayBoardWidth / 2, -displayBoardHeight / 2, -displayBoardThickness])
         cube([displayBoardWidth, displayBoardHeight, displayBoardThickness], center=false);
+}
+
+module display_mount() {
     // corner tabs
-    for (i = [-1,1])
+    #for (i = [-1,1])
         for (j = [-1,1]) {
             translate([i * displayBoardWidth/2, j * displayBoardHeight/2, -displayBoardThickness])
                 difference() {
-                    cube([20, 20, 3], center=true);
-                    translate([i *2, j * 2, -displayBoardThickness / 2])
+                    cube([displayMountTabWidth, displayMountTabHeight, displayMountTabThickness], center=true);
+                    translate([i * 2, j * 2, -displayBoardThickness / 2])
+                        cylinder(h=displayBoardThickness + 2, r = displayScrewDiameter + iFitAdjust_d);
+                }
+        }
+}
+
+displayMountTabThickness = 3;
+displayMountTabWidth = 15;
+displayMountTabHeight = 20;
+module display_mount_tabs() {
+    // corner tabs
+    for (i = [-1,1])
+        for (j = [-1,1]) {
+            translate([i * displayBoardWidth/2, j * displayBoardHeight/2, -displayBoardThickness - displayMountTabThickness / 2])
+                difference() {
+                    cube([displayMountTabWidth, displayMountTabHeight, displayMountTabThickness], center=true);
+                    translate([i * 2, j * 2, -displayBoardThickness / 2])
                         cylinder(h=displayBoardThickness + 2, r = displayScrewDiameter + iFitAdjust_d);
                 }
         }
@@ -47,16 +66,24 @@ module encoder() {
 }
 
 // lid with screen and encoders
+lidThickness = displayScreenThickness - .5;
 module lid() {
+  display_mount_tabs();
+  display_mount();
   difference() {
     // face plate
-    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, -displayBoardThickness / 2])
-        cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, displayScreenThickness / .5 ]);
+    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
+        cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, lidThickness]);
     // screen cutout
- display()    ;
-  }
+    display();
     // encoder cutout
+    %for (i = [-1,1])
+        for (j = [-1,1]) {
+            translate([i * displayBoardWidth/2 + i * encoderWidth, j * displayBoardHeight/2, - encoderShaftHeight / 2 + 2])
+                encoder();
+        }
     // screw holes
+  }
 }
 
 // box with pi mounts and holes
