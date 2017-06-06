@@ -48,8 +48,13 @@ module encoder() {
 
 // lid with screen and encoders
 module lid() {
+  difference() {
     // face plate
+    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, -displayBoardThickness / 2])
+        cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, displayScreenThickness / .5 ]);
     // screen cutout
+ display()    ;
+  }
     // encoder cutout
     // screw holes
 }
@@ -64,4 +69,5 @@ module box() {
 }
 
 //display();
-encoder();
+//encoder();
+lid();
