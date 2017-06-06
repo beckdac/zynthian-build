@@ -1,5 +1,9 @@
 #include <Adafruit_MCP23017.h>
 
+// NOTE: dacb has edited the Adafruit library to include a call to 
+// Wire.setClock after Wire.begin to increase the i2c clock to 1.7M
+// which is an allowed rate in the MCP23017 datasheet
+
 #undef DEBUG
 #define DEBUG
 
@@ -58,19 +62,27 @@ button_t buttons[BUTTONS] = {
 typedef struct string {
 	uint8_t pin;
 	unsigned int value;
+	unsigned int baseline_value;
+	enum string_state {
+		IDLE = 0,
+		EVENT = 1,
+		RECOVER = 2
+	} state;
 } string_t;
 
 #define STRINGS 8
 string_t strings[STRINGS] = {
-	{ 0,  0 },
-	{ 1,  0 },
-	{ 2,  0 },
-	{ 3,  0 },
-	{ 6,  0 },
-	{ 7,  0 },
-	{ 8,  0 },
-	{ 9,  0 }
+	{ 0,  0, 0, IDLE },
+	{ 1,  0, 0, IDLE },
+	{ 2,  0, 0, IDLE },
+	{ 3,  0, 0, IDLE },
+	{ 6,  0, 0, IDLE },
+	{ 7,  0, 0, IDLE },
+	{ 8,  0, 0, IDLE },
+	{ 9,  0, 0, IDLE }
 };
+
+#define STRING_LEVEL_EVENT_PERCENT_CHANGE 30
 
 void setup() {
 	int i;
@@ -110,17 +122,18 @@ void setup() {
 	// read initial values in, assumes all strings are unobstructed
 	for (i = 0; i < STRINGS; ++i) {
 		strings[i].value = analogRead(strings[i].pin);
+		strings[i].baseline_value = strings[i].value;
 	}
 
 #ifdef DEBUG
 	Serial1.println("done");
 
-	Serial1.println("analog values for air strings:");
+	Serial1.println("analog baseline values for air strings:");
 	for (i = 0; i < STRINGS; ++i) {
 		Serial1.print("string ");
 		Serial1.print(i, DEC);
 		Serial1.print(": ");
-		Serial1.println(strings[i].value, DEC);
+		Serial1.println(strings[i].baseline_value, DEC);
 	}
 #endif
 }
@@ -137,7 +150,7 @@ void loop() {
 	gpioAB[1] = mcp1.readGPIOAB();
 
 	// process the encoders
-	for (i == 0; i < ENCODERS; ++i) {
+	for (i = 0; i < ENCODERS; ++i) {
 		if (encoders[i].mcpX == &mcp0) {
 			A = bitRead(gpioAB[0], encoders[i].pinA);
 			B = bitRead(gpioAB[0], encoders[i].pinB);
@@ -151,6 +164,12 @@ void loop() {
 		// like report the state change over midi
 		if (sw != encoders[i].sw) {
 			encoders[i].sw = sw;
+#ifdef DEBUG
+			Serial1.print("encoder ");
+			Serial1.print(i, DEC);
+			Serial1.print("switch state change: ");
+			Serial1.println(sw, DEC);
+#endif
 		}
 		// the encoder has changed state
 		// increase?
@@ -160,6 +179,12 @@ void loop() {
 				encoders[i].value += 1;
 				if (encoders[i].value > encoders[i].max_value)
 					encoders[i].value = encoders[i].max_value;
+#ifdef DEBUG
+				Serial1.print("encoder ");
+				Serial1.print(i, DEC);
+				Serial1.print("value change (+1): ");
+				Serial1.println(encoders[i].value, DEC);
+#endif
 			}
 		}
 		// decrease?
@@ -167,8 +192,15 @@ void loop() {
 			encoders[i].B = !encoders[i].B;
 			if (encoders[i].B && !encoders[i].A) {
 				encoders[i].value -= 1;
-			if (encoders[i].value < encoders[i].min_value)
-				encoders[i].value = encoders[i].min_value;
+				if (encoders[i].value < encoders[i].min_value)
+					encoders[i].value = encoders[i].min_value;
+#ifdef DEBUG
+				Serial1.print("encoder ");
+				Serial1.print(i, DEC);
+				Serial1.print("value change (-1): ");
+				Serial1.println(encoders[i].value, DEC);
+#endif
+			}
 		}
 	}
 
@@ -185,11 +217,49 @@ void loop() {
 		// like report the state change over midi
 		if (sw != buttons[i].sw) {
 			buttons[i].sw = sw;
+#ifdef DEBUG
+			Serial1.print("button ");
+			Serial1.print(i, DEC);
+			Serial1.print("state change: ");
+			Serial1.println(sw, DEC);
+#endif
 		}
 	}
 
 	// this needs to do something with the new value	
 	for (i = 0; i < STRINGS; ++i) {
-		strings[i].value = analogRead(strings[i].pin);
+		event_magnitude = 0;
+		value = analogRead(strings[i].pin);
+		// if we have deviated more than STRING_LEVEL_EVENT_PERCENT_CHANGE% of baseline
+		// report a change
+		if (strings[i].state == IDLE && value < strings[i].baseline_value - (strings[i].baseline_value / STRING_LEVEL_EVENT_PERCENT_CHANGE)) {
+			strings[i].state = EVENT;
+			strings[i].value = value;
+#ifdef DEBUG
+			Serial1.print("string ");
+			Serial1.print(i, DEC);
+			Serial1.print("event begins");
+#endif
+		} else if (strings[i].state == EVENT) {
+			// if value begins to recover, put us in recover state
+			if (value > strings[i].value) {
+				int event_magnitude = strings[i].baseline_value - strings[i].value;
+				strings[i].state = RECOVER;
+#ifdef DEBUG
+				Serial1.print("string ");
+				Serial1.print(i, DEC);
+				Serial1.print("event with magnitude: ");
+				Serial1.println(event_magnitude, DEC);
+#endif
+			}
+		// if we are in recovery state and the analog voltage has reached baseline again IDLE the event
+		} else if (strings[i].state == RECOVER && value >  strings[i].baseline_value - (strings[i].baseline_value / STRING_LEVEL_EVENT_PERCENT_CHANGE)) {
+			strings[i].state = IDLE;
+#ifdef DEBUG
+			Serial1.print("string ");
+			Serial1.print(i, DEC);
+			Serial1.println("is idle again");
+#endif
+		}
 	}
 }
