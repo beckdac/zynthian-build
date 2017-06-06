@@ -3,43 +3,43 @@
 Adafruit_MCP23017 mcp0, mcp1;
 
 typedef struct encoder {
-	Adafruit_MCP23017 mcpX;		// which mcp chip is this encoder on
+	Adafruit_MCP23017 *mcpX;	// which mcp chip is this encoder on
 	uint8_t pinA, pinB, pinSW;	// which pins are A, B, and SW
 	boolean A, B, sw;			// last value of A and B and SW
-	unsigned int value;			// value of encoder
-	unsigned int min_value;		// min value encoder can have
-	unsigned int max_value;		// max value encoder can have
+	int16_t value;				// value of encoder
+	int16_t min_value;			// min value encoder can have
+	int16_t max_value;			// max value encoder can have
 } encoder_t;
 
 #define ENCODERS 8
 // setup the encoder data structures
 encoder_t encoders[ENCODERS] = {
-	{ mcp0, 0, 1, 2,    true, true, false, 0, 0, 20 },
-	{ mcp0, 3, 4, 5,    true, true, false, 0, 0, 20 },
-	{ mcp0, 8, 9, 10,   true, true, false, 0, 0, 20 },
-	{ mcp0, 11, 12, 13, true, true, false, 0, 0, 20 },
-	{ mcp1, 0, 1, 2,    true, true, false, 0, 0, 20 },
-	{ mcp1, 3, 4, 5,    true, true, false, 0, 0, 20 },
-	{ mcp1, 8, 9, 10,   true, true, false, 0, 0, 20 },
-	{ mcp1, 11, 12, 13, true, true, false, 0, 0, 20 }
+	{ &mcp0, 0, 1, 2,    true, true, false, 0, 0, 20 },
+	{ &mcp0, 3, 4, 5,    true, true, false, 0, 0, 20 },
+	{ &mcp0, 8, 9, 10,   true, true, false, 0, 0, 20 },
+	{ &mcp0, 11, 12, 13, true, true, false, 0, 0, 20 },
+	{ &mcp1, 0, 1, 2,    true, true, false, 0, 0, 20 },
+	{ &mcp1, 3, 4, 5,    true, true, false, 0, 0, 20 },
+	{ &mcp1, 8, 9, 10,   true, true, false, 0, 0, 20 },
+	{ &mcp1, 11, 12, 13, true, true, false, 0, 0, 20 }
 };
 
 typedef struct button {
-	Adafruit_MCP23017 mcpX;		// which mcp is this button on, NULL if teensy pin
+	Adafruit_MCP23017 *mcpX;	// which mcp is this button on, NULL if teensy pin
 	uint8_t pin;				// pin #
 	boolean sw;					// state of switch
 } button_t;
 
 #define BUTTONS 16
 button_t buttons[BUTTONS] = {
-	{ mcp0, 6,  false },
-	{ mcp0, 7,  false },
-	{ mcp0, 14, false },
-	{ mcp0, 15, false },
-	{ mcp1, 6,  false },
-	{ mcp1, 7,  false },
-	{ mcp1, 14, false },
-	{ mcp1, 15, false },
+	{ &mcp0, 6,  false },
+	{ &mcp0, 7,  false },
+	{ &mcp0, 14, false },
+	{ &mcp0, 15, false },
+	{ &mcp1, 6,  false },
+	{ &mcp1, 7,  false },
+	{ &mcp1, 14, false },
+	{ &mcp1, 15, false },
 	{ NULL, 2,  false },
 	{ NULL, 3,  false },
 	{ NULL, 4,  false },
@@ -72,32 +72,99 @@ string_t strings[STRINGS] = {
 void setup() {
 	int i;
 
+	// intialize the i2c devices
 	mcp0.begin(0);
 	mcp1.begin(1);
 
 	// setup input pins for encoders, note the encoder
 	// pins have their own pullups
 	for (i = 0; i < ENCODERS; ++i) {
-		encoder[i].mcpX.pinMode(encoder[i].pinA, INPUT);
-		encoder[i].mcpX.pinMode(encoder[i].pinB, INPUT);
-		encoder[i].mcpX.pinMode(encoder[i].pinSW, INPUT);
+		encoders[i].mcpX->pinMode(encoders[i].pinA, INPUT);
+		encoders[i].mcpX->pinMode(encoders[i].pinB, INPUT);
+		encoders[i].mcpX->pinMode(encoders[i].pinSW, INPUT);
 	}
 
 	// setup input pins and enable pullups
 	for (i = 0; i < BUTTONS; ++i) {
-		if (button[i].mcpX) {
-			button[i].mcpX.pinMode(button[i].pin, INPUT);
-			button[i].mcpX.pullUp(button[i].pin, HIGH);
+		if (buttons[i].mcpX) {
+			buttons[i].mcpX->pinMode(buttons[i].pin, INPUT);
+			buttons[i].mcpX->pullUp(buttons[i].pin, HIGH);
 		} else {
-			pinMode(button[i].pin, INPUT_PULLUP);
+			pinMode(buttons[i].pin, INPUT_PULLUP);
 		}
 	}
 
 	// read initial values in, assumes all strings are unobstructed
 	for (i = 0; i < STRINGS; ++i) {
-		string[i].value = analogRead(string[i].pin);
+		strings[i].value = analogRead(strings[i].pin);
 	}
 }
 
+uint16_t gpioAB[2];
+boolean A, B, sw;
+unsigned int value;
+
 void loop() {
+	int i;
+
+	// read all the ports on the mcps
+	gpioAB[0] = mcp0.readGPIOAB();
+	gpioAB[1] = mcp1.readGPIOAB();
+
+	// process the encoders
+	for (i == 0; i < ENCODERS; ++i) {
+		if (encoders[i].mcpX == &mcp0) {
+			A = bitRead(gpioAB[0], encoders[i].pinA);
+			B = bitRead(gpioAB[0], encoders[i].pinB);
+			sw = bitRead(gpioAB[0], encoders[i].pinSW);
+		} else {
+			A = bitRead(gpioAB[1], encoders[i].pinA);
+			B = bitRead(gpioAB[1], encoders[i].pinB);
+			sw = bitRead(gpioAB[1], encoders[i].pinSW);
+		}
+		// this needs to actually do something here
+		// like report the state change over midi
+		if (sw != encoders[i].sw) {
+			encoders[i].sw = sw;
+		}
+		// the encoder has changed state
+		// increase?
+		if (A != encoders[i].A) {
+			encoders[i].A = !encoders[i].A;
+			if (encoders[i].A && !encoders[i].B) {
+				encoders[i].value += 1;
+				if (encoders[i].value > encoders[i].max_value)
+					encoders[i].value = encoders[i].max_value;
+			}
+		}
+		// decrease?
+		if (B != encoders[i].B) {
+			encoders[i].B = !encoders[i].B;
+			if (encoders[i].B && !encoders[i].A) {
+				encoders[i].value -= 1;
+			if (encoders[i].value < encoders[i].min_value)
+				encoders[i].value = encoders[i].min_value;
+		}
+	}
+
+	// process the buttons
+	for (i = 0; i < BUTTONS; ++i) {
+		if (buttons[i].mcpX == &mcp0) {
+			sw = bitRead(gpioAB[0], buttons[i].pin);
+		} else if (buttons[i].mcpX == &mcp1) {
+			sw = bitRead(gpioAB[1], buttons[i].pin);
+		} else {
+			sw = digitalRead(buttons[i].pin);
+		}
+		// this needs to actually do something here
+		// like report the state change over midi
+		if (sw != buttons[i].sw) {
+			buttons[i].sw = sw;
+		}
+	}
+
+	// this needs to do something with the new value	
+	for (i = 0; i < STRINGS; ++i) {
+		strings[i].value = analogRead(strings[i].pin);
+	}
 }
