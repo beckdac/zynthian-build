@@ -15,22 +15,24 @@ displayDepth = 22;
 displayScrewDiameter = 3;
 module display() {
     // screen
-    %translate([-displayScreenWidth / 2, -displayScreenHeight / 2, 0])
+    translate([-displayScreenWidth / 2, -displayScreenHeight / 2, 0])
         cube([displayScreenWidth, displayScreenHeight, displayScreenThickness], center=false);
     // board
-    %translate([-displayBoardWidth / 2, -displayBoardHeight / 2, -displayBoardThickness])
+    translate([-displayBoardWidth / 2, -displayBoardHeight / 2, -displayBoardThickness])
         cube([displayBoardWidth, displayBoardHeight, displayBoardThickness], center=false);
 }
 
+displayMountThickness = displayBoardThickness;
+displayMountScrewOffset = 2;
 module display_mount() {
     // corner tabs
-    #for (i = [-1,1])
+    for (i = [-1,1])
         for (j = [-1,1]) {
-            translate([i * displayBoardWidth/2, j * displayBoardHeight/2, -displayBoardThickness])
+            translate([i * displayBoardWidth/2 + i * displayMountScrewOffset, j * displayBoardHeight/2 + j * displayMountScrewOffset, -displayMountThickness / 2])
                 difference() {
-                    cube([displayMountTabWidth, displayMountTabHeight, displayMountTabThickness], center=true);
-                    translate([i * 2, j * 2, -displayBoardThickness / 2])
-                        cylinder(h=displayBoardThickness + 2, r = displayScrewDiameter + iFitAdjust_d);
+                    cube([displayMountTabWidth, displayMountTabHeight, displayMountThickness], center=true);
+                    translate([i * 2, j * 2, -displayBoardThickness])
+                        cylinder(h=2 * displayBoardThickness + 2, r = displayScrewDiameter + iFitAdjust_d);
                 }
         }
 }
@@ -42,7 +44,7 @@ module display_mount_tabs() {
     // corner tabs
     for (i = [-1,1])
         for (j = [-1,1]) {
-            translate([i * displayBoardWidth/2, j * displayBoardHeight/2, -displayBoardThickness - displayMountTabThickness / 2])
+            translate([i * displayBoardWidth/2 + i * displayMountScrewOffset, j * displayBoardHeight/2 + j * displayMountScrewOffset, -displayBoardThickness - displayMountTabThickness / 2])
                 difference() {
                     cube([displayMountTabWidth, displayMountTabHeight, displayMountTabThickness], center=true);
                     translate([i * 2, j * 2, -displayBoardThickness / 2])
@@ -67,22 +69,32 @@ module encoder() {
 
 // lid with screen and encoders
 lidThickness = displayScreenThickness - .5;
+lidScrewDiameter = 3.5;
+lidScrewBoundaryOffset = 10;
 module lid() {
-  display_mount_tabs();
-  display_mount();
+  //display_mount_tabs();
+  
   difference() {
     // face plate
-    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
-        cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, lidThickness]);
+    union() {
+        translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
+            cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, lidThickness]);
+        display_mount();
+    }
     // screen cutout
     display();
     // encoder cutout
-    %for (i = [-1,1])
+    for (i = [-1,1])
         for (j = [-1,1]) {
-            translate([i * displayBoardWidth/2 + i * encoderWidth, j * displayBoardHeight/2, - encoderShaftHeight / 2 + 2])
+            translate([i * displayBoardWidth/2 + i * (encoderWidth * 1.1), j * displayBoardHeight/2, - encoderShaftHeight / 2 + 2])
                 encoder();
         }
     // screw holes
+    #for (i = [-1,1])
+        for (j = [-1,1]) {
+            translate([i * (displayBoardWidth * 1.5 + encoderWidth * 1.1 - lidScrewBoundaryOffset) / 2, j * (displayBoardHeight * 1.25 +            encoderLength - lidScrewBoundaryOffset) / 2, - encoderShaftHeight / 2 + 2])
+                cylinder(h=20, d=lidScrewDiameter + iFitAdjust_d);
+        }
   }
 }
 
