@@ -196,7 +196,7 @@ void loop() {
 				Serial1.println(encoders[i].value, DEC);
 #endif
 #ifdef MIDI
-				usbMIDI.sendControlChange(encoders[i].control, encoders[i].value, channel);
+				usbMIDI.sendControlChange(encoders[i].control_number, encoders[i].value, channel);
 #endif
 			}
 		}
@@ -214,7 +214,7 @@ void loop() {
 				Serial1.println(encoders[i].value, DEC);
 #endif
 #ifdef MIDI
-				usbMIDI.sendControlChange(encoders[i].control, encoders[i].value, channel);
+				usbMIDI.sendControlChange(encoders[i].control_number, encoders[i].value, channel);
 #endif
 			}
 		}
