@@ -33,33 +33,51 @@ module encoder() {
 }
 
 // string
-stringWallThickness = 2;
+stringWallThickness = 1;
 stringRecess = 5;
 stringLength = 60;
-photoresistorWidth = 5;
-photoresistorLength = 4;
+photoresistorWidth = 6.5;
+photoresistorLength = 6.5;
 photoresistorWireSep = 3.5;
-ledLaserDiameter = 6;
+ledLaserDiameter = 8;
 ledLaserLength = 10;
+wireCasingDepth = 3;
 module photoresistor_holder() {
     difference() {
         cylinder(h = stringRecess + stringWallThickness * 2, d = 2 * stringWallThickness + photoresistorWidth + iFitAdjust_d, center = false);
-        translate([0,0,stringWallThickness + .1])
-            cylinder(h = stringRecess + stringWallThickness + 1, d = photoresistorWidth + iFitAdjust_d, center = false);
+        translate([0,0,-.1])
+            cylinder(h = stringRecess + stringWallThickness * 2 + 1, d = photoresistorWidth + iFitAdjust_d, center = false);
+        /*
         for (i = [-1,1])
             translate([i * photoresistorWireSep / 2, 0, -1])
                 cylinder(h = 20, d = 1, center = false);
+        */
     }
+    rotate([0, 0, 180])
+        translate([-(ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness)/2, -(ledLaserDiameter )/2, -(wireCasingDepth + stringWallThickness * 2)])
+        difference() {
+            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter + ledLaserDiameter / 2, wireCasingDepth + stringWallThickness * 2], center=false);
+            translate([stringWallThickness, stringWallThickness * 2, stringWallThickness])
+                cube([ledLaserDiameter + iFitAdjust_d , ledLaserDiameter + ledLaserDiameter / 2 - stringWallThickness, wireCasingDepth + stringWallThickness * 2], center=false);
+        }
 }
 module led_holder() {
     difference() {
         cylinder(h = ledLaserLength + stringWallThickness * 2, d = 2 * stringWallThickness + ledLaserDiameter + iFitAdjust_d, center = false);
-        translate([0,0,stringWallThickness + .1])
-            cylinder(h = ledLaserLength + stringWallThickness + 1, d = ledLaserDiameter + iFitAdjust_d, center = false);
+        translate([0,0,-.1])
+            cylinder(h = ledLaserLength + stringWallThickness * 2 + 1, d = ledLaserDiameter + iFitAdjust_d, center = false);
+        /*
         for (i = [-1,1])
             translate([i * photoresistorWireSep / 2, 0, -1])
                 cylinder(h = 20, d = 1, center = false);
+        */
     }
+    translate([-(ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness)/2, -(ledLaserDiameter )/2, -(wireCasingDepth + stringWallThickness * 2)])
+        difference() {
+            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter + ledLaserDiameter / 2, wireCasingDepth + stringWallThickness * 2], center=false);
+            translate([stringWallThickness, stringWallThickness * 2, stringWallThickness])
+                cube([ledLaserDiameter + iFitAdjust_d , ledLaserDiameter + ledLaserDiameter / 2 - stringWallThickness, wireCasingDepth + stringWallThickness * 2], center=false);
+        }
 }
 module string() {
     photoresistor_holder();
