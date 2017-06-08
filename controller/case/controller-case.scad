@@ -54,11 +54,13 @@ module photoresistor_holder() {
         */
     }
     rotate([0, 0, 180])
-        translate([-(ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness)/2, -(ledLaserDiameter )/2, -(wireCasingDepth + stringWallThickness * 2)])
+        translate([-(ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness)/2, -(ledLaserDiameter )/2 - 1, -(wireCasingDepth + stringWallThickness * 2)])
         difference() {
-            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter + ledLaserDiameter / 2, wireCasingDepth + stringWallThickness * 2], center=false);
-            translate([stringWallThickness, stringWallThickness * 2, stringWallThickness])
-                cube([ledLaserDiameter + iFitAdjust_d , ledLaserDiameter + ledLaserDiameter / 2 - stringWallThickness, wireCasingDepth + stringWallThickness * 2], center=false);
+            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter + ledLaserDiameter / 2 + 1, wireCasingDepth + stringWallThickness * 2], center=false);
+            translate([stringWallThickness, stringWallThickness * 2 + 1, stringWallThickness])
+                cube([ledLaserDiameter + iFitAdjust_d , ledLaserDiameter + ledLaserDiameter / 2 - stringWallThickness, wireCasingDepth], center=false);
+            translate([ledLaserDiameter / 2 + stringWallThickness, ledLaserDiameter / 2 + stringWallThickness, stringWallThickness])
+                cylinder(h=wireCasingDepth + 2 * stringWallThickness, d = ledLaserDiameter + iFitAdjust, center=false);
         }
 }
 module led_holder() {
@@ -72,11 +74,13 @@ module led_holder() {
                 cylinder(h = 20, d = 1, center = false);
         */
     }
-    translate([-(ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness)/2, -(ledLaserDiameter )/2, -(wireCasingDepth + stringWallThickness * 2)])
+    translate([-(ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness)/2, -(ledLaserDiameter )/2 - 1, -(wireCasingDepth + stringWallThickness * 2)])
         difference() {
-            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter + ledLaserDiameter / 2, wireCasingDepth + stringWallThickness * 2], center=false);
-            translate([stringWallThickness, stringWallThickness * 2, stringWallThickness])
-                cube([ledLaserDiameter + iFitAdjust_d , ledLaserDiameter + ledLaserDiameter / 2 - stringWallThickness, wireCasingDepth + stringWallThickness * 2], center=false);
+            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter + ledLaserDiameter / 2 + 1, wireCasingDepth + stringWallThickness * 2], center=false);
+            translate([stringWallThickness, stringWallThickness * 2 + 1, stringWallThickness])
+                cube([ledLaserDiameter + iFitAdjust_d , ledLaserDiameter + ledLaserDiameter / 2 - stringWallThickness, wireCasingDepth], center=false);
+            translate([ledLaserDiameter / 2 + stringWallThickness, ledLaserDiameter / 2 + stringWallThickness, stringWallThickness])
+                cylinder(h=wireCasingDepth + 2 * stringWallThickness, d = ledLaserDiameter + iFitAdjust, center=false);
         }
 }
 module string() {
@@ -85,8 +89,8 @@ module string() {
         rotate([180, 0, 0])
             led_holder();
     difference() {
-        translate([-(ledLaserDiameter + 2 * stringWallThickness)/2, - ledLaserDiameter, 0])
-            cube([ledLaserDiameter + 2 * stringWallThickness, ledLaserDiameter / 2, stringLength ], center = false);
+        translate([-(ledLaserDiameter + 2 * stringWallThickness + iFitAdjust_d)/2, - ledLaserDiameter, 0])
+            cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter / 2, stringLength ], center = false);
         cylinder(h=100, d = ledLaserDiameter + iFitAdjust, center=false);
     }
 }
