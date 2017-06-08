@@ -4,8 +4,8 @@
 // Wire.setClock after Wire.begin to increase the i2c clock to 1.7M
 // which is an allowed rate in the MCP23017 datasheet
 
-#undef MIDI
 #define MIDI
+#undef MIDI
 #ifdef MIDI
 const int channel = 1;
 #endif
@@ -25,17 +25,19 @@ typedef struct encoder {
 	uint8_t control_number;		// control number
 } encoder_t;
 
-#define ENCODERS 8
+#define ENCODERS 2
 // setup the encoder data structures
 encoder_t encoders[ENCODERS] = {
 	{ &mcp0, 0, 1, 2,    true, true, false, 63, 0, 127, 70 },
 	{ &mcp0, 3, 4, 5,    true, true, false, 63, 0, 127, 71 },
+/*
 	{ &mcp0, 8, 9, 10,   true, true, false, 63, 0, 127, 72 },
 	{ &mcp0, 11, 12, 13, true, true, false, 63, 0, 127, 73 },
 	{ &mcp1, 0, 1, 2,    true, true, false, 63, 0, 127, 74 },
 	{ &mcp1, 3, 4, 5,    true, true, false, 63, 0, 127, 75 },
 	{ &mcp1, 8, 9, 10,   true, true, false, 63, 0, 127, 76 },
 	{ &mcp1, 11, 12, 13, true, true, false, 63, 0, 127, 77 }
+*/
 };
 
 typedef struct button {
@@ -44,8 +46,9 @@ typedef struct button {
 	boolean sw;					// state of switch
 } button_t;
 
-#define BUTTONS 16
+#define BUTTONS 0
 button_t buttons[BUTTONS] = {
+/*
 	{ &mcp0, 6,  false },	// latch
 	{ &mcp0, 7,  false },
 	{ &mcp0, 14, false },
@@ -62,6 +65,7 @@ button_t buttons[BUTTONS] = {
 	{ NULL, 7,  false },
 	{ NULL, 8,  false },
 	{ NULL, 9,  false }
+*/
 };
 
 // air strings, laser diode pointing at photoresistor
@@ -80,16 +84,18 @@ typedef struct string {
 	string_state_t state;
 } string_t;
 
-#define STRINGS 8
+#define STRINGS 1
 string_t strings[STRINGS] = {
-	{ 2, 60, 0, IDLE },	// C4
-	{ 3, 62, 0, IDLE },	// D4
-	{ 4, 64, 0, IDLE },	// E4
-	{ 5, 65, 0, IDLE },	// F4
-	{ 6, 67, 0, IDLE },	// G4
-	{ 7, 69, 0, IDLE },	// A4
-	{ 8, 71, 0, IDLE }, // B4
-	{ 9, 72, 0, IDLE },	// C5
+	{ 14, 60, 0, IDLE },	// C4
+/*
+	{ 15, 62, 0, IDLE },	// D4
+	{ 16, 64, 0, IDLE },	// E4
+	{ 17, 65, 0, IDLE },	// F4
+	{ 20, 67, 0, IDLE },	// G4
+	{ 21, 69, 0, IDLE },	// A4
+	{ 22, 71, 0, IDLE },	// B4
+	{ 23, 72, 0, IDLE },	// C5
+*/
 };
 
 #define STRING_LEVEL_EVENT_PERCENT_CHANGE 30
@@ -98,8 +104,8 @@ void setup() {
 	int i;
 
 #ifdef DEBUG
-	Serial1.begin(115200);
-	Serial1.print("setup...");
+	Serial.begin(115200);
+	Serial.print("setup...");
 #endif
 
 	// intialize the i2c devices
@@ -136,14 +142,14 @@ void setup() {
 	}
 
 #ifdef DEBUG
-	Serial1.println("done");
+	Serial.println("done");
 
-	Serial1.println("analog baseline values for air strings:");
+	Serial.println("analog baseline values for air strings:");
 	for (i = 0; i < STRINGS; ++i) {
-		Serial1.print("string ");
-		Serial1.print(i, DEC);
-		Serial1.print(": ");
-		Serial1.println(strings[i].baseline_value, DEC);
+		Serial.print("string ");
+		Serial.print(i, DEC);
+		Serial.print(": ");
+		Serial.println(strings[i].baseline_value, DEC);
 	}
 #endif
 }
@@ -175,10 +181,10 @@ void loop() {
 		if (sw != encoders[i].sw) {
 			encoders[i].sw = sw;
 #ifdef DEBUG
-			Serial1.print("encoder ");
-			Serial1.print(i, DEC);
-			Serial1.print("switch state change: ");
-			Serial1.println(sw, DEC);
+			Serial.print("encoder ");
+			Serial.print(i, DEC);
+			Serial.print(" switch state change: ");
+			Serial.println(sw, DEC);
 #endif
 		}
 		// the encoder has changed state
@@ -190,10 +196,10 @@ void loop() {
 				if (encoders[i].value > encoders[i].max_value)
 					encoders[i].value = encoders[i].max_value;
 #ifdef DEBUG
-				Serial1.print("encoder ");
-				Serial1.print(i, DEC);
-				Serial1.print("value change (+1): ");
-				Serial1.println(encoders[i].value, DEC);
+				Serial.print("encoder ");
+				Serial.print(i, DEC);
+				Serial.print(" value change (+1): ");
+				Serial.println(encoders[i].value, DEC);
 #endif
 #ifdef MIDI
 				usbMIDI.sendControlChange(encoders[i].control_number, encoders[i].value, channel);
@@ -208,10 +214,10 @@ void loop() {
 				if (encoders[i].value < encoders[i].min_value)
 					encoders[i].value = encoders[i].min_value;
 #ifdef DEBUG
-				Serial1.print("encoder ");
-				Serial1.print(i, DEC);
-				Serial1.print("value change (-1): ");
-				Serial1.println(encoders[i].value, DEC);
+				Serial.print("encoder ");
+				Serial.print(i, DEC);
+				Serial.print(" value change (-1): ");
+				Serial.println(encoders[i].value, DEC);
 #endif
 #ifdef MIDI
 				usbMIDI.sendControlChange(encoders[i].control_number, encoders[i].value, channel);
@@ -234,10 +240,10 @@ void loop() {
 		if (sw != buttons[i].sw) {
 			buttons[i].sw = sw;
 #ifdef DEBUG
-			Serial1.print("button ");
-			Serial1.print(i, DEC);
-			Serial1.print("state change: ");
-			Serial1.println(sw, DEC);
+			Serial.print("button ");
+			Serial.print(i, DEC);
+			Serial.print(" state change: ");
+			Serial.println(sw, DEC);
 #endif
 		}
 	}
@@ -247,12 +253,13 @@ void loop() {
 		value = analogRead(strings[i].pin);
 		// if we have deviated more than STRING_LEVEL_EVENT_PERCENT_CHANGE% of baseline
 		// report a change
+#if 1
 		if (strings[i].state == IDLE && value < strings[i].baseline_value - (strings[i].baseline_value / STRING_LEVEL_EVENT_PERCENT_CHANGE)) {
 			strings[i].state = EVENT;
 #ifdef DEBUG
-			Serial1.print("string ");
-			Serial1.print(i, DEC);
-			Serial1.println("event begins");
+			Serial.print("string ");
+			Serial.print(i, DEC);
+			Serial.println(" event begins");
 #endif
 		} else if (strings[i].state == EVENT) {
 			// if value begins to recover, put us in recover state
@@ -260,10 +267,10 @@ void loop() {
 				int event_magnitude = strings[i].baseline_value - strings[i].value;
 				strings[i].state = RECOVER;
 #ifdef DEBUG
-				Serial1.print("string ");
-				Serial1.print(i, DEC);
-				Serial1.print("event with magnitude: ");
-				Serial1.println(event_magnitude, DEC);
+				Serial.print("string ");
+				Serial.print(i, DEC);
+				Serial.print(" event with magnitude: ");
+				Serial.println(event_magnitude, DEC);
 #endif
 #ifdef MIDI
 				// divide by 8 as max value of event could be 1024 and max value of velocity is 127
@@ -274,14 +281,20 @@ void loop() {
 		} else if (strings[i].state == RECOVER && value >  strings[i].baseline_value - (strings[i].baseline_value / STRING_LEVEL_EVENT_PERCENT_CHANGE)) {
 			strings[i].state = IDLE;
 #ifdef DEBUG
-			Serial1.print("string ");
-			Serial1.print(i, DEC);
-			Serial1.println("is idle again");
+			Serial.print("string ");
+			Serial.print(i, DEC);
+			Serial.println(" is idle again");
 #endif
 #ifdef MIDI
 			usbMIDI.sendNoteOff(strings[i].note, 0, channel);
 #endif
 		}
+#else
+		Serial.print("string ");
+		Serial.print(i, DEC);
+		Serial.print(" value ");
+		Serial.println(value, DEC);
+#endif
 		strings[i].value = value;
 	}
 
