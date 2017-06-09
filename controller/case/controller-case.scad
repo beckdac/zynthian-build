@@ -36,10 +36,10 @@ module encoder() {
 stringWallThickness = 1;
 stringRecess = 5;
 stringLength = 60;
-photoresistorWidth = 6.5;
-photoresistorLength = 6.5;
+photoresistorWidth = 5.5 + iFitAdjust_d;
+photoresistorLength = photoresistorWidth;
 photoresistorWireSep = 3.5;
-ledLaserDiameter = 8;
+ledLaserDiameter = 6.5 + iFitAdjust_d;
 ledLaserLength = 10;
 wireCasingDepth = 3;
 module photoresistor_holder() {
