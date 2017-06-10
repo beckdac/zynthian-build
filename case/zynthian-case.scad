@@ -234,15 +234,17 @@ boxHeight = 80;
 boxThickness = lidThickness;
 hifiMcpSpacer = 6;
 screwTabDim = 10;
+rpi3USBPowerCordHoleHeight = 7;
+rpi3USBPowerCordDiameter = 11;
+rpi3USBPowerCordZipDiameter = 3;
+rpi3USBPowerCordZipOffset = 9;
 module pi3_mounts() {
     difference() {
-        union() {
-               
-      translate([-(85-6)/2,-(56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
-      translate([-(85-6)/2, (56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
-      translate([ (85-6)/2,-(56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
-      translate([ (85-6)/2, (56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
-
+        union() {    
+            translate([-85/2+3.5,-49/2, 0]) cylinder(r=3, h=rPi3BottomSpacer);
+            translate([-85/2+3.5, 49/2, 0]) cylinder(r=3, h=rPi3BottomSpacer);
+            translate([58-85/2+3.5,-49/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
+            translate([58-85/2+3.5, 49/2, 0]) cylinder(r=3, h=rPi3BottomSpacer);
         }
         translate([-85/2+3.5,-49/2,-1]) cylinder(d=2.75, h=20);
         translate([-85/2+3.5, 49/2,-1]) cylinder(d=2.75, h=20);
@@ -290,6 +292,15 @@ module box(renderPi3=true, renderMcpHifi=true) {
             translate([i * (displayBoardWidth * 1.5 + encoderWidth * 1.1 - lidScrewBoundaryOffset) / 2, j * (displayBoardHeight * 1.25 +            encoderLength - lidScrewBoundaryOffset) / 2, - encoderShaftHeight / 2 + 2])
                 cylinder(h=60, d=lidScrewDiameter + iFitAdjust_d);
         }
+        // power cord hole and zip hole
+        translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - 1, 15, 0])
+        rotate([0, 90, 0])
+        translate([-rpi3USBPowerCordHoleHeight - boxThickness, 0, 0]) {
+            translate([0, 0, 0])
+                cylinder(h=boxThickness * 2, d=rpi3USBPowerCordDiameter);
+            translate([-rpi3USBPowerCordZipOffset, 0, 0])
+                cylinder(h=boxThickness * 2, d=rpi3USBPowerCordZipDiameter);
+        }
     }
     // pi usb / ethernet cutou
     // pi mount holes
@@ -321,5 +332,5 @@ module box(renderPi3=true, renderMcpHifi=true) {
 //encoder();
 //lid();
 //display_mount_tabs();
-box();
-//box(renderPi3=false, renderMcpHifi=false);
+//box();
+box(renderPi3=false, renderMcpHifi=false);
