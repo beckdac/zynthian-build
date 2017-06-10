@@ -165,10 +165,27 @@ module hifi_mcp23017_boards() {
 anker7PortHubHeight = 44.5;
 anker7PortHubLength = 110;
 anker7PortHubWidth = 23;
+anker7PortHubPowerDiameter = 10.5;
+anker7PortHubPowerHeight = 31;
+anker7PortHubPowerLength = 5;
+anker7PortHubPowerWidth = 10.4;
+anker7PortHubUSBH = 9;
+anker7PortHubUSBW = 11;
+anker7PortHubUSBHeight = 14.5;
+anker7PortHubUSBLength = 5;
+anker7PortHubUSBWidth = 9;
 module anker_7port_usb_hub() {
-    color("black")
-    translate([0, 0, boxThickness])
-        cube([anker7PortHubWidth, anker7PortHubLength, anker7PortHubHeight]);
+    difference() {
+        color("black")
+        translate([0, 0, boxThickness])
+            cube([anker7PortHubWidth, anker7PortHubLength, anker7PortHubHeight]);
+        translate([anker7PortHubPowerWidth, anker7PortHubPowerLength, anker7PortHubPowerHeight])
+            rotate([90, 0, 0])
+                cylinder(h=20, d=anker7PortHubPowerDiameter);
+        translate([anker7PortHubUSBWidth - anker7PortHubUSBW / 2, anker7PortHubUSBLength, anker7PortHubUSBHeight - anker7PortHubUSBH/2])
+            rotate([90, 0, 0])
+                cube([anker7PortHubUSBW, anker7PortHubUSBH, 20]);
+    }
 }
 
 // box with pi mounts and holes
