@@ -121,6 +121,39 @@ hifiBoardCutoutHeight = 14.5;
 hifiBoardScrewDiameter = 4;
 hifiBoardScrewInset = 3.7;
 hifiMcpWidth = mcp23017BoardWidth - mcpToHifiOffset + hifiBoardWidth;
+higiMcpLength = hifiBoardLength;
+module hifi_mcp23017_board_mount() {
+    difference() {
+        union() {
+            // mcp board
+            cube([mcp23017BoardScrewInset * 2, mcp23017BoardScrewInset * 2, hifiMcpSpacer]);
+            translate([mcp23017BoardWidth - mcp23017BoardScrewInset * 2, 0, 0])
+                cube([mcp23017BoardScrewInset * 2, mcp23017BoardScrewInset * 2, hifiMcpSpacer]);
+            translate([0, mcp23017BoardLength - mcp23017BoardScrewInset * 2, 0])
+                cube([mcp23017BoardScrewInset * 2, mcp23017BoardScrewInset * 2, hifiMcpSpacer]);
+            translate([mcp23017BoardWidth - mcp23017BoardScrewInset * 2, mcp23017BoardLength - mcp23017BoardScrewInset * 2, 0])
+                cube([mcp23017BoardScrewInset * 2, mcp23017BoardScrewInset * 2, hifiMcpSpacer]);
+            // hifi board
+            translate([-hifiBoardWidth + mcpToHifiOffset, 0, 0])
+                cube([hifiBoardScrewInset * 2, hifiBoardScrewInset * 2, mcp23017BoardHeight + header40PinHeight + hifiMcpSpacer]);
+            translate([-hifiBoardWidth + mcpToHifiOffset, hifiBoardLength - hifiBoardScrewInset * 2, 0])
+                cube([hifiBoardScrewInset * 2, hifiBoardScrewInset * 2, mcp23017BoardHeight + header40PinHeight + hifiMcpSpacer]);
+        }
+        // screw holes
+        translate([mcp23017BoardScrewInset, mcp23017BoardScrewInset, -.1])
+            cylinder(d=mcp23017BoardScrewDiameter, h=20);
+        translate([mcp23017BoardWidth - mcp23017BoardScrewInset, mcp23017BoardScrewInset, -.1])
+            cylinder(d=mcp23017BoardScrewDiameter, h=20);
+        translate([mcp23017BoardScrewInset, mcp23017BoardLength - mcp23017BoardScrewInset, -.1])
+            cylinder(d=mcp23017BoardScrewDiameter, h=20);
+        translate([mcp23017BoardWidth - mcp23017BoardScrewInset, mcp23017BoardLength - mcp23017BoardScrewInset, -.1])
+            cylinder(d=mcp23017BoardScrewDiameter, h=20);
+        translate([-hifiBoardWidth + mcpToHifiOffset + hifiBoardScrewInset, hifiBoardScrewInset, mcp23017BoardHeight + header40PinHeight - 10])
+                cylinder(d=hifiBoardScrewDiameter, h=20);
+        translate([-hifiBoardWidth + mcpToHifiOffset + hifiBoardScrewInset, hifiBoardLength - hifiBoardScrewInset * 2 + hifiBoardScrewInset, mcp23017BoardHeight + header40PinHeight - 10])
+                cylinder(d=hifiBoardScrewDiameter, h=20);
+    }
+}
 module hifi_mcp23017_boards() {
     // mcp23017 protoboard
     color("limegreen")
@@ -160,6 +193,11 @@ module hifi_mcp23017_boards() {
     color("darkgrey") 
     translate([-hifiBoardWidth + mcpToHifiOffset - hifiBoardCutoutWidth / 2, hifiBoardLength / 2 - hifiBoardCutoutLength / 2, mcp23017BoardHeight + header40PinHeight])
         cube([hifiBoardCutoutWidth, hifiBoardCutoutLength, hifiBoardCutoutHeight]);
+    // 40 pin header
+    color("black")
+    translate([header40pinInsetL, header40pinInsetW, mcp23017BoardHeight + header40PinHeight + hifiBoardHeight])
+        cube([header40PinWidth, header40PinLength, header40PinHeight]);
+
 }
 
 anker7PortHubHeight = 44.5;
@@ -189,35 +227,92 @@ module anker_7port_usb_hub() {
 }
 
 // box with pi mounts and holes
-rPi3BottomSpacer = 4;
+rPi3BottomSpacer = 6;
 rPi3Length = 85;
 rpi3Width = 56;
 boxHeight = 80;
 boxThickness = lidThickness;
-hifiMcpSpacer = 4;
-module box() {
+hifiMcpSpacer = 6;
+screwTabDim = 10;
+module pi3_mounts() {
+    difference() {
+        union() {
+               
+      translate([-(85-6)/2,-(56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
+      translate([-(85-6)/2, (56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
+      translate([ (85-6)/2,-(56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
+      translate([ (85-6)/2, (56-6)/2,0]) cylinder(r=3, h=rPi3BottomSpacer);
 
-    // bottom
-    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
-            cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, boxThickness]);
-    // pi mount holes
-    translate([(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - rPi3Length / 2, (displayBoardHeight * 1.25 + encoderLength)/2 - 29, boxThickness + rPi3BottomSpacer])
-        pi3();
-    // sides
-    for (i = [-1, 1])
-        translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -i * (displayBoardHeight * 1.25 + encoderLength)/2 - (i == -1 ? boxThickness : 0), 0])
-            cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, boxThickness, boxHeight]);
-    for (i = [-1, 1])
-        translate([-i * (displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - (i == -1 ? boxThickness : 0), -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
-            cube([boxThickness, displayBoardHeight * 1.25 + encoderLength, boxHeight]);
+        }
+        translate([-85/2+3.5,-49/2,-1]) cylinder(d=2.75, h=20);
+        translate([-85/2+3.5, 49/2,-1]) cylinder(d=2.75, h=20);
+        translate([58-85/2+3.5,-49/2,-1]) cylinder(d=2.75, h=20);
+        translate([58-85/2+3.5, 49/2,-1]) cylinder(d=2.75, h=20);
+    }
+}
+module box(renderPi3=true, renderMcpHifi=true) {
+    difference() {
+        union() {
+            // bottom
+            translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
+                cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, displayBoardHeight * 1.25 +            encoderLength, boxThickness]);
+            // sides
+            for (i = [-1, 1])
+                translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2, -i * (displayBoardHeight * 1.25 + encoderLength)/2 - (i == -1 ? boxThickness : 0), 0])
+                    cube([displayBoardWidth * 1.5 + encoderWidth * 1.1, boxThickness, boxHeight]);
+            for (i = [-1, 1])
+                translate([-i * (displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - (i == -1 ? boxThickness : 0), -(displayBoardHeight * 1.25 + encoderLength)/2, 0])
+                    cube([boxThickness, displayBoardHeight * 1.25 + encoderLength, boxHeight]);
+            // screw tabs
+            for (i = [-1,1])
+                for (j = [-1,1]) {
+                translate([i * (displayBoardWidth * 1.5 + encoderWidth * 1.1 - lidScrewBoundaryOffset) / 2, j * (displayBoardHeight * 1.25 +            encoderLength - lidScrewBoundaryOffset) / 2, boxHeight / 2])
+                    cube([screwTabDim, screwTabDim, boxHeight], center = true);
+                }
+        }
+        // hifi audio out board with mcp23017 board
+        rotate([0, 0, 90])
+            translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 + hifiMcpWidth, -(displayBoardHeight * 1.25 + encoderLength / 2) + hifiBoardLength / 2, boxThickness + hifiMcpSpacer])
+                hifi_mcp23017_boards();
+        // pi usb / ethernet cutout
+        rotate([0, 0, 270])
+        translate([(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - 81, -30, boxThickness + rPi3BottomSpacer])
+            pi3();
+        // hub port
+//        translate([-20, (displayBoardHeight * 1.25 + encoderLength) /2 + 10, boxThickness])
+//            rotate([0, 0, 270])
+//                translate([0, 0, boxThickness * 2])
+//                    cube([anker7PortHubWidth, anker7PortHubLength, anker7PortHubHeight - boxThickness]);
+            // screw holes
+        translate([0, 0, boxHeight - 50])
+        for (i = [-1,1])
+        for (j = [-1,1]) {
+            translate([i * (displayBoardWidth * 1.5 + encoderWidth * 1.1 - lidScrewBoundaryOffset) / 2, j * (displayBoardHeight * 1.25 +            encoderLength - lidScrewBoundaryOffset) / 2, - encoderShaftHeight / 2 + 2])
+                cylinder(h=60, d=lidScrewDiameter + iFitAdjust_d);
+        }
+    }
     // pi usb / ethernet cutou
-
+    // pi mount holes
+    if (renderPi3)
+    rotate([0, 0, 270])
+        translate([(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - 83, -30, boxThickness + rPi3BottomSpacer])
+            pi3();
+     rotate([0, 0, 270])
+        translate([(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 - 83, -30, boxThickness])
+        pi3_mounts();
     // hifi audio out board with mcp23017 board
+    if (renderMcpHifi)
     rotate([0, 0, 90])
-    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 + hifiMcpWidth, 0, boxThickness + hifiMcpSpacer])
+    translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 + hifiMcpWidth, -(displayBoardHeight * 1.25 + encoderLength / 2) + hifiBoardLength / 2, boxThickness + hifiMcpSpacer])
         hifi_mcp23017_boards();
+    // mounts for hifi
+    rotate([0, 0, 90])
+        translate([-(displayBoardWidth * 1.5 + encoderWidth * 1.1)/2 + hifiMcpWidth, -(displayBoardHeight * 1.25 + encoderLength / 2) + hifiBoardLength / 2, boxThickness])
+        hifi_mcp23017_board_mount();
     // anker usb power hub
-    anker_7port_usb_hub();
+//    translate([-20, (displayBoardHeight * 1.25 + encoderLength) /2 - boxThickness, boxThickness])
+//        rotate([0, 0, 270])
+//            anker_7port_usb_hub();
  //   translate([0,0,boxHeight + 2])
  //       lid();
 }
@@ -227,3 +322,4 @@ module box() {
 //lid();
 //display_mount_tabs();
 box();
+//box(renderPi3=false, renderMcpHifi=false);
