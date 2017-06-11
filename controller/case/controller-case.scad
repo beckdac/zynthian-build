@@ -23,6 +23,7 @@ module momentary_button(color="white") {
 // encoders
 encoderShaftDiameter = 7;
 encoderShaftHeight = 18;
+encoderShaftOffset = 9;
 encoderWidth = 18;
 encoderLength = 31;
 encoderDepth = 8.2;
@@ -30,7 +31,7 @@ module encoder() {
     // encoder shaft
     cylinder(h = encoderShaftHeight, d = encoderShaftDiameter, center=false);
     // encoder base
-    translate([-encoderWidth/2, -encoderLength/2, -encoderDepth/2])
+    translate([-encoderWidth/2, -encoderShaftOffset, -encoderDepth/2])
         cube([encoderWidth, encoderLength, encoderDepth]);
 }
 
@@ -125,13 +126,13 @@ module spoke_lid() {
             // led buttons
                     translate([ledButtonDiameter / 2 + controlOffset, 0, 0])
                         momentary_button();
-            // latch buttons
-                    translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2, 0, 0])
-                        latch_button();
             // encoders
-                    translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2 + encoderLength * 1.2, 0, 0])
-                    rotate([0, 0, 90])
+                    #translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2 + encoderLength / 4, 0, 0])
+                    rotate([0, 0, 270])
                         encoder();
+            // latch buttons
+                    translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2 + encoderLength + 5, 0, 0])
+                        latch_button();
             
                 }
             }
