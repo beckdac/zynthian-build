@@ -109,8 +109,44 @@ i2cOLEDScrewHeight = 22;
 module display() {
 }
 
-module lid() {
-    string();
+lidWidth = 100;
+lidThickness = 2.5;
+rowWidth = ledButtonDiameter + 10;
+lidLength = rowWidth * 2 + ledButtonDiameter / 2;
+controlOffset = 10;
+lidScrewDiameter = 3.5;
+lidScrewBoundaryOffset = 10;
+module spoke_lid() {
+    union() {
+        difference () {
+            cube([lidWidth, lidLength, lidThickness]);
+            for (i = [0:1]) {
+                translate([0, ledButtonDiameter + i * rowWidth, -lidThickness * 2]) {
+            // led buttons
+                    translate([ledButtonDiameter / 2 + controlOffset, 0, 0])
+                        momentary_button();
+            // latch buttons
+                    translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2, 0, 0])
+                        latch_button();
+            // encoders
+                    translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2 + encoderLength * 1.2, 0, 0])
+                    rotate([0, 0, 90])
+                        encoder();
+            
+                }
+            }
+            translate([lidScrewBoundaryOffset/2, lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            translate([lidWidth - lidScrewBoundaryOffset/2, lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            translate([lidScrewBoundaryOffset/2, lidLength - lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            translate([lidWidth - lidScrewBoundaryOffset/2, lidLength - lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+        }
+    }
+    //string();
+    
 }
 
-lid();
+spoke_lid();
