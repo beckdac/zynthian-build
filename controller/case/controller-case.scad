@@ -7,15 +7,17 @@ iFitAdjust_d = .25;
 // latch buttons
 latchButtonDiameter = 13;
 latchButtonHeight = 30;
-module latch_button() {
-    cylinder(h = latchButtonHeight, d = latchButtonDiameter, center = false);
+module latch_button(color="green") {
+    color(color)
+        cylinder(h = latchButtonHeight, d = latchButtonDiameter, center = false);
 }
 
 // led momentary buttons
 ledButtonDiameter = 24;
 ledButtonHeight = 33;
-module momentary_button() {
-    cylinder(h = ledButtonHeight, d = ledButtonDiameter, center = false);
+module momentary_button(color="white") {
+    color(color)
+        cylinder(h = ledButtonHeight, d = ledButtonDiameter, center = false);
 }
 
 // encoders
@@ -84,6 +86,9 @@ module led_holder() {
         }
 }
 module string() {
+ rotate([0, 0, 90])
+  translate([0, -(wireCasingDepth + stringWallThickness * 2), ledLaserDiameter]) rotate([90, 0, 0])
+   union() {
     photoresistor_holder();
     translate([0, 0, stringLength])
         rotate([180, 0, 0])
@@ -93,10 +98,11 @@ module string() {
             cube([ledLaserDiameter + iFitAdjust_d + 2 * stringWallThickness, ledLaserDiameter / 2, stringLength ], center = false);
         cylinder(h=100, d = ledLaserDiameter + iFitAdjust, center=false);
     }
+   }
 }
 
 // display
-i2cOLEDWidth = 27;
+    OLEDWidth = 27;
 i2cOLEDHeight = 16;
 i2cOLEDScrewWidth = 20;
 i2cOLEDScrewHeight = 22;
