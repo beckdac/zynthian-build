@@ -1,8 +1,24 @@
 # zynthian-build
 Zynthian RPi-3 build w/ case, controller, etc.
+
+### Note: this is a reference build for the mcp23017 + interrupt based encoders and switches.
+
+Demo (with terrible instrument choice):
+[![Demo](https://img.youtube.com/vi/0LxjHgSQMDI/0.jpg)](https://youtu.be/0LxjHgSQMDI)
+
 DAC:
 * https://www.sainsmart.com/sainsmart-hifi-dac-audio-sound-card-module-i2s-interface-for-raspberry-pi-2-b.html
-    * ![hack to add 40pin header](https://raw.githubusercontent.com/beckdac/zynthian-build/master/sainsmart_40pin_header_hack.png)
+    * header hack:
+![hack to add 40pin header](https://raw.githubusercontent.com/beckdac/zynthian-build/master/sainsmart_40pin_header_hack.png)
+MCP23017 details
+* Board schematic: ![Board schematic](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/mcp23017_encoders/mcp23017_encoders.png)
+* Zynthian webconf setup should look like this:: ![webconf setup](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/mcp23017_encoders/zynthian_webconf_setup.png)
+
+Assembly photos:
+* Lid inside ![Lid inside](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/lid-inside.jpg)
+* Lid outside ![Lid outside](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/lid-outside.jpg)
+* Case inside ![Case inside](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/case-inside.jpg)
+* Final ![Final](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/final.jpg)
 
 ---
 
