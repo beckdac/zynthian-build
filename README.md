@@ -1,5 +1,8 @@
 # zynthian-build
 Zynthian RPi-3 build w/ case, controller, etc.
+DAC:
+* https://www.sainsmart.com/sainsmart-hifi-dac-audio-sound-card-module-i2s-interface-for-raspberry-pi-2-b.html
+    * ![hack to add 40pin header](https://raw.githubusercontent.com/beckdac/zynthian-build/master/sainsmart_40pin_header_hack.png)
 
 ---
 
