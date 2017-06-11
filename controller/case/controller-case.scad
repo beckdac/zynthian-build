@@ -45,6 +45,7 @@ photoresistorWireSep = 3.5;
 ledLaserDiameter = 6.5 + iFitAdjust_d;
 ledLaserLength = 10;
 wireCasingDepth = 3;
+stringWidth = ledLaserDiameter;
 module photoresistor_holder() {
     difference() {
         cylinder(h = stringRecess + stringWallThickness * 2, d = 2 * stringWallThickness + photoresistorWidth + iFitAdjust_d, center = false);
@@ -127,7 +128,7 @@ module spoke_lid() {
                     translate([ledButtonDiameter / 2 + controlOffset, 0, 0])
                         momentary_button();
             // encoders
-                    #translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2 + encoderLength / 4, 0, 0])
+                    translate([ledButtonDiameter / 2 + controlOffset + 2 * controlOffset + latchButtonDiameter / 2 + encoderLength / 4, 0, 0])
                     rotate([0, 0, 270])
                         encoder();
             // latch buttons
@@ -146,8 +147,37 @@ module spoke_lid() {
                 cylinder(h=lidThickness * 2, d=lidScrewDiameter);
         }
     }
-    //string();
-    
 }
 
-spoke_lid();
+module string_lid() {
+    union() {
+        difference () {
+            union() {
+                cube([lidWidth, lidLength, lidThickness]);
+            }
+            translate([lidScrewBoundaryOffset/2, lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            translate([lidWidth - lidScrewBoundaryOffset/2, lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            translate([lidScrewBoundaryOffset/2, lidLength - lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            translate([lidWidth - lidScrewBoundaryOffset/2, lidLength - lidScrewBoundaryOffset/2, -.1])
+                cylinder(h=lidThickness * 2, d=lidScrewDiameter);
+            for (i = [0:7])
+                translate([15 + stringWidth * i * 1.5, 5, -.01])
+                    rotate([0, 0, 90])
+                        hull() string();
+        }
+        for (i = [0:7])
+            translate([15 + stringWidth * i * 1.5, 5, 0])
+                rotate([0, 0, 90])
+                    string();
+   }
+}
+
+module case() {
+    //spoke_lid();
+    string_lid();
+}
+
+case();
