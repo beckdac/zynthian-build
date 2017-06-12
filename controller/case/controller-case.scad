@@ -13,7 +13,7 @@ module latch_button(color="green") {
 }
 
 // led momentary buttons
-ledButtonDiameter = 24;
+ledButtonDiameter = 25;
 ledButtonHeight = 33;
 module momentary_button(color="white") {
     color(color)
@@ -21,7 +21,7 @@ module momentary_button(color="white") {
 }
 
 // encoders
-encoderShaftDiameter = 7;
+encoderShaftDiameter = 8;
 encoderShaftHeight = 18;
 encoderShaftOffset = 9;
 encoderWidth = 18;
@@ -175,9 +175,118 @@ module string_lid() {
    }
 }
 
+boxHeight = 45;
+screwTabDim = 10;
+boxThickness = lidThickness;
+boxWidth = lidWidth;
+boxLength = lidLength;
+boxScrewDiameter = lidScrewDiameter;
+module spoke_box() {
+    difference() {
+        union() {
+             difference () {
+                union() {
+                    cube([lidWidth, lidLength, lidThickness]);
+                    for (i = [0,1])
+                        for (j = [0,1]) {
+                            translate([i * lidWidth - i * screwTabDim, j * lidLength - j * screwTabDim, 0])
+                                cube([screwTabDim, screwTabDim, boxHeight]);
+                    }
+                    cube([boxWidth, boxThickness, boxHeight]);
+                    translate([0, boxLength - boxThickness, 0])
+                        cube([boxWidth, boxThickness, boxHeight]);
+                    cube([boxThickness, boxLength, boxHeight]);
+                    translate([boxWidth - screwTabDim, 0, 0])
+                        cube([screwTabDim, boxLength, screwTabDim]);
+                }
+                for (i = [0,1])
+                    for (j = [0,1]) {
+                        translate([i * boxWidth - i * screwTabDim + screwTabDim / 2, j * boxLength - j * screwTabDim + screwTabDim / 2, boxHeight - 9])
+                            cylinder(h=20, d = lidScrewDiameter);
+                    }
+                for (i = [1, 2])
+                    translate([boxWidth - screwTabDim / 2, i * boxLength / 3, boxThickness])
+                        cylinder(h=screwTabDim + .1 - boxThickness, d=boxScrewDiameter);
+                translate([boxWidth - screwTabDim / 2, screwTabDim + .1, (boxHeight / 3) * 2])
+                    rotate([90, 0, 0])
+                        cylinder(h=screwTabDim + .1 - boxThickness, d=boxScrewDiameter);
+                translate([boxWidth - screwTabDim / 2, boxLength - boxThickness, (boxHeight / 3) * 2])
+                    rotate([90, 0, 0])
+                        cylinder(h=screwTabDim + .1 - boxThickness, d=boxScrewDiameter);
+            }
+        }
+    }
+}
+
+pentagonRadius = boxLength / (2.0 * sin(180. / 5.));
+pentagonR = (1/10) * sqrt(25 + 10 * sqrt(5)) * boxLength;
+module pentagon_core() {
+    difference() {
+        union() {
+            cylinder(h=boxThickness, r=pentagonRadius, $fn=5);
+            translate([-pentagonR, 0, 0])
+                    translate([0, -boxLength / 2, 0])
+                        cube([screwTabDim, boxLength, screwTabDim]);
+            rotate([0, 0,  36])
+                translate([pentagonR - screwTabDim, 0, 0])
+                    translate([0, -boxLength / 2, 0])
+                        cube([screwTabDim, boxLength, screwTabDim]);
+            rotate([0, 0,  2 * 36])
+                translate([-pentagonR, 0, 0])
+                    translate([0, -boxLength / 2, 0])
+                        cube([screwTabDim, boxLength, screwTabDim]);
+            rotate([0, 0,  3 * 36])
+                translate([pentagonR - screwTabDim, 0, 0])
+                    translate([0, -boxLength / 2, 0])
+                        cube([screwTabDim, boxLength, screwTabDim]);
+            rotate([0, 0,  4 * 36])
+                translate([-pentagonR, 0, 0])
+                    translate([0, -boxLength / 2, 0])
+                        cube([screwTabDim, boxLength, screwTabDim]);
+            for (i = [0:4])
+                rotate([0, 0, i * 72])
+                    for (j = [-1, 1])
+                        translate([-pentagonR + screwTabDim / 2, j * boxLength / 2 - j * screwTabDim / 2, 0])   
+                            translate([0, 0, boxHeight/2])
+                                cube([screwTabDim, screwTabDim, boxHeight], center=true);
+        }
+        for (i = [0:4])
+            rotate([0, 0, i * 72])
+                translate([-pentagonR + screwTabDim / 2, 0, 0]) {
+                    translate([0, -boxLength / 3 / 2, boxThickness])
+                        cylinder(h=screwTabDim + .1 - boxThickness, d=boxScrewDiameter);
+                    translate([0, boxLength / 3 / 2, boxThickness])
+                        cylinder(h=screwTabDim + .1 - boxThickness, d=boxScrewDiameter);
+                }
+        for (i = [0:4])
+            rotate([0, 0, i * 72])
+                for (j = [-1, 1])
+                    translate([-pentagonR + screwTabDim / 2, j * boxLength / 2 - (j == -1 ? -1 * screwTabDim : screwTabDim / 4), 0])   
+                        translate([0, 0, (boxHeight / 3) * 2])
+                            rotate([90, 0, 0])
+                                #cylinder(h=screwTabDim + .1 - boxThickness, d=boxScrewDiameter);
+         for (i = [0:4])
+            rotate([0, 0, i * 72])
+                translate([pentagonRadius - (screwTabDim / 3) * 2, 0, boxHeight - 9.9])
+                    cylinder(h=10, d=boxScrewDiameter);
+   }
+}
+
+module screw_tab() {
+    difference() {
+        cube([screwTabDim, 2 * screwTabDim, boxThickness]);
+        for (i = [0,1])
+            translate([screwTabDim / 2, screwTabDim / 2 + i * screwTabDim, -.1])
+                cylinder(h=10, d=boxScrewDiameter);
+    }
+}
+
 module case() {
     //spoke_lid();
-    string_lid();
+    //string_lid();
+    //spoke_box();
+    //screw_tab();
+    pentagon_core();
 }
 
 case();
