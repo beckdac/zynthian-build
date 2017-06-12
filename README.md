@@ -10,6 +10,8 @@ DAC:
 * https://www.sainsmart.com/sainsmart-hifi-dac-audio-sound-card-module-i2s-interface-for-raspberry-pi-2-b.html
     * header hack:
 ![hack to add 40pin header](https://raw.githubusercontent.com/beckdac/zynthian-build/master/sainsmart_40pin_header_hack.png)
+* webconf for the DAC:
+![webconf_DAC](https://raw.githubusercontent.com/beckdac/zynthian-build/master/sainsmart_audio_webonf.png)
 MCP23017 details
 * Board schematic: ![Board schematic](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/mcp23017_encoders/mcp23017_encoders.png)
 * Zynthian webconf setup should look like this:: ![webconf setup](https://raw.githubusercontent.com/beckdac/zynthian-build/master/case/mcp23017_encoders/zynthian_webconf_setup.png)
