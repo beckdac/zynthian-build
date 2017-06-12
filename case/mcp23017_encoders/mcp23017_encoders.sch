@@ -333,7 +333,7 @@ F 3 "" H 7200 4300 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Text GLabel 6100 2700 2    60   Input ~ 0
-WiringPi_26
+WiringPi_27
 Text GLabel 6100 2600 2    60   Input ~ 0
 WiringPi_25
 $EndSCHEMATC
