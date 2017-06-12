@@ -3,6 +3,8 @@ Zynthian RPi-3 build w/ case, controller, etc.
 
 ### Note: this is a reference build for the mcp23017 + interrupt based encoders and switches.
 
+* Demo of the MCP23017 controller function:
+[![DemoMCP23017](https://img.youtube.com/vi/FxFq7r3IcjM/0.jpg)](https://youtu.be/FxFq7r3IcjM)
 * Demo (with terrible instrument choice):
 [![Demo](https://img.youtube.com/vi/0LxjHgSQMDI/0.jpg)](https://youtu.be/0LxjHgSQMDI)
 
