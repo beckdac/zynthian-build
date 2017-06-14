@@ -76,47 +76,10 @@ F 3 "" H 5600 2000 50  0001 C CNN
 	1    5600 2000
 	1    0    0    -1  
 $EndComp
-Text GLabel 6650 1450 2    60   Input ~ 0
-SCL
-Text GLabel 6650 1550 2    60   Input ~ 0
-SDA
 Text GLabel 6100 3400 2    60   Input ~ 0
 SDA
 Text GLabel 6100 3300 2    60   Input ~ 0
 SCL
-$Comp
-L +3V3 #PWR?
-U 1 1 5936D9C5
-P 6450 1150
-F 0 "#PWR?" H 6450 1000 50  0001 C CNN
-F 1 "+3V3" H 6450 1290 50  0000 C CNN
-F 2 "" H 6450 1150 50  0001 C CNN
-F 3 "" H 6450 1150 50  0001 C CNN
-	1    6450 1150
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R?
-U 1 1 5936D9DF
-P 6450 1300
-F 0 "R?" V 6530 1300 50  0000 C CNN
-F 1 "4.7k" V 6450 1300 50  0000 C CNN
-F 2 "" V 6380 1300 50  0001 C CNN
-F 3 "" H 6450 1300 50  0001 C CNN
-	1    6450 1300
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R?
-U 1 1 5936DA26
-P 6350 1300
-F 0 "R?" V 6430 1300 50  0000 C CNN
-F 1 "4.7k" V 6350 1300 50  0000 C CNN
-F 2 "" V 6280 1300 50  0001 C CNN
-F 3 "" H 6350 1300 50  0001 C CNN
-	1    6350 1300
-	1    0    0    -1  
-$EndComp
 $Comp
 L GND #PWR?
 U 1 1 5936DAF3
@@ -279,15 +242,6 @@ Connection ~ 6100 3800
 Connection ~ 6100 3700
 Wire Wire Line
 	6100 3600 6100 3800
-Connection ~ 6450 1150
-Wire Wire Line
-	6350 1550 6350 1450
-Wire Wire Line
-	6650 1550 6350 1550
-Wire Wire Line
-	6450 1450 6650 1450
-Wire Wire Line
-	6350 1150 6450 1150
 $Comp
 L GND #PWR?
 U 1 1 593721D7
