@@ -315,8 +315,20 @@ module pentagon_lid() {
             rotate([0, 0, (i == 0 ? - 1 : 1) * 12 + i * 72])
                 translate([pentagonRadius - latchButtonDiameter * 2.2, 0, -10])
                     encoder();
+
+        rotate([0, 0, 4*-72])
+            translate([-pentagonR + boxThickness, -sdCardWidth / 2, 10])
+                rotate([0, 90, 0]) 
+                    sd_card(iFitAdjust);
     }
 //    display();
+}
+
+sdCardHeight = 32;
+sdCardWidth = 24;
+sdCardThickness = 2.1;
+module sd_card(adjust) {
+    cube([sdCardHeight + adjust, sdCardWidth + adjust, sdCardThickness + adjust]);
 }
 
 module screw_tab() {
