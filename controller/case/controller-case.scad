@@ -298,15 +298,23 @@ module pentagon_lid() {
         translate([-OLEDWidth / 2, 0, 0]) rotate([0, 0, -18]) {
             translate([0, (OLEDWidth - OLEDDisplayHeight) / 2, -.1])
                 cube([OLEDWidth, OLEDDisplayHeight, boxThickness + .2]);
-                for (i = [0: 1])
-                    for (j = [0: 1])
-                        translate([(OLEDWidth - OLEDScrewWidth) / 2 + i * OLEDScrewWidth, (OLEDWidth - OLEDScrewHeight) / 2 + j * OLEDScrewHeight, -.1])
-                            cylinder(h=boxThickness + 1, d=OLEDScrewDiameter);
+            for (i = [0: 1])
+                for (j = [0: 1])
+                    translate([(OLEDWidth - OLEDScrewWidth) / 2 + i * OLEDScrewWidth, (OLEDWidth - OLEDScrewHeight) / 2 + j * OLEDScrewHeight, -.1])
+                        cylinder(h=boxThickness + 1, d=OLEDScrewDiameter);
         }
         for (i = [3:4])
             rotate([0, 0, i * 72])
-                translate([pentagonRadius - (screwTabDim / 3) * 2, 0, -.1])
-                    #cylinder(h=10, d=boxScrewDiameter);
+                translate([pentagonRadius - ledButtonDiameter * 1.5, 0, -.1])
+                    momentary_button(color="red");
+        for (i = [3:4])
+            rotate([0, 0, 180 + i * 72])
+                translate([pentagonRadius - latchButtonDiameter * 2.2, 0, -.1])
+                    latch_button((i == 3 ? "red" : "green"));
+        for (i = [0,2])
+            rotate([0, 0, (i == 0 ? - 1 : 1) * 12 + i * 72])
+                translate([pentagonRadius - latchButtonDiameter * 2.2, 0, -10])
+                    encoder();
     }
 //    display();
 }
