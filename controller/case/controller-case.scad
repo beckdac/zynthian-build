@@ -104,11 +104,25 @@ module string() {
 }
 
 // display
-    OLEDWidth = 27;
-i2cOLEDHeight = 16;
-i2cOLEDScrewWidth = 20;
-i2cOLEDScrewHeight = 22;
+OLEDWidth = 27.3;
+OLEDDisplayHeight = 19;
+OLEDScrewWidth = 20.7;
+OLEDScrewHeight = 23.2;
+OLEDScrewDiameter = 3;
+OLEDDepth = 1;
+OLEDDisplayDepth = 1;
 module display() {
+    difference() {
+        union() {
+            cube([OLEDWidth, OLEDWidth, OLEDDepth]);
+            translate([0, (OLEDWidth - OLEDDisplayHeight) / 2, 1])
+                cube([OLEDWidth, OLEDDisplayHeight, OLEDDisplayDepth]);
+        }
+        for (i = [0: 1])
+            for (j = [0: 1])
+                translate([(OLEDWidth - OLEDScrewWidth) / 2 + i * OLEDScrewWidth, (OLEDWidth - OLEDScrewHeight) / 2 + j * OLEDScrewHeight, -.1])
+                    cylinder(h=boxThickness + 1, d=OLEDScrewDiameter);
+    }
 }
 
 lidWidth = 100;
@@ -272,6 +286,31 @@ module pentagon_core() {
    }
 }
 
+module pentagon_lid() {
+    difference() {
+        union() {
+            cylinder(h=boxThickness, r=pentagonRadius, $fn=5);
+        }
+        for (i = [0:4])
+            rotate([0, 0, i * 72])
+                translate([pentagonRadius - (screwTabDim / 3) * 2, 0, -.1])
+                    cylinder(h=10, d=boxScrewDiameter);
+        translate([-OLEDWidth / 2, 0, 0]) rotate([0, 0, -18]) {
+            translate([0, (OLEDWidth - OLEDDisplayHeight) / 2, -.1])
+                cube([OLEDWidth, OLEDDisplayHeight, boxThickness + .2]);
+                for (i = [0: 1])
+                    for (j = [0: 1])
+                        translate([(OLEDWidth - OLEDScrewWidth) / 2 + i * OLEDScrewWidth, (OLEDWidth - OLEDScrewHeight) / 2 + j * OLEDScrewHeight, -.1])
+                            cylinder(h=boxThickness + 1, d=OLEDScrewDiameter);
+        }
+        for (i = [3:4])
+            rotate([0, 0, i * 72])
+                translate([pentagonRadius - (screwTabDim / 3) * 2, 0, -.1])
+                    #cylinder(h=10, d=boxScrewDiameter);
+    }
+//    display();
+}
+
 module screw_tab() {
     difference() {
         cube([screwTabDim, 2 * screwTabDim, boxThickness]);
@@ -282,11 +321,14 @@ module screw_tab() {
 }
 
 module case() {
-    //spoke_lid();
+    //translate([0, 0, boxHeight + boxThickness]) spoke_lid();
     //string_lid();
     //spoke_box();
     //screw_tab();
-    pentagon_core();
+    //pentagon_core();
+    //translate([0, 0, boxHeight + boxThickness]) 
+        pentagon_lid();
+    //display();
 }
 
 case();
